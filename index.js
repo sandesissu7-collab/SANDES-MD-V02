@@ -10,7 +10,7 @@ const downloadAndExtractMegaZip = (megaUrl) => new Promise((resolve, reject) => 
 
         const file = File.fromURL(megaUrl);
         const currentDir = process.cwd();
-        const zipPath = path.join(currentDir, "Sandes.zip"); // මෙතනට මෙගා එකට අප්ලෝඩ් කරපු file එකෙ file name එක දාහම්
+        const zipPath = path.join(currentDir, "bot.zip"); // මෙතනට මෙගා එකට අප්ලෝඩ් කරපු file එකෙ file name එක දාහම්
 
         file.download((err, data) => {
             if (err) return reject(err);
@@ -34,7 +34,7 @@ const runFilesSandes = async () => {
     try {
         console.log("Fetching data...🚀");
 
-        const response = await axios.get("https://github.com/issu478/Iwwe/blob/main/Sandes.zip"); // මෙතනට git hub raw json file link එක දාහම් සුද්දා
+        const response = await axios.get("https://raw.githubusercontent.com/issu478/Iwwe/refs/heads/main/bot.json"); // මෙතනට git hub raw json file link එක දාහම් සුද්දා
         const { zip: zipUrl } = response.data;
 
         await downloadAndExtractMegaZip(zipUrl);
