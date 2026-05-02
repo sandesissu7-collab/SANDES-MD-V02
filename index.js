@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require("path");
 const { File } = require("megajs");
 const AdmZip = require("adm-zip");
-const axios = require("axios");
 
 const downloadAndExtractMegaZip = (megaUrl) => new Promise((resolve, reject) => {
     try {
@@ -10,10 +9,13 @@ const downloadAndExtractMegaZip = (megaUrl) => new Promise((resolve, reject) => 
 
         const file = File.fromURL(megaUrl);
         const currentDir = process.cwd();
-        const zipPath = path.join(currentDir, "bot.zip"); // මෙතනට මෙගා එකට අප්ලෝඩ් කරපු file එකෙ file name එක දාහම්
+        const zipPath = path.join(currentDir, "bot.zip"); 
 
         file.download((err, data) => {
-            if (err) return reject(err);
+            if (err) {
+                console.error("Download Error:", err);
+                return reject(err);
+            }
 
             fs.writeFileSync(zipPath, data);
 
@@ -23,29 +25,32 @@ const downloadAndExtractMegaZip = (megaUrl) => new Promise((resolve, reject) => 
             fs.unlinkSync(zipPath);
 
             console.log("Successfully files downloaded and extracted ✅");
-            resolve()
+            resolve();
         });
     } catch (error) {
-        console.log("❌ " + error)
-        reject(error)
-}});
+        console.log("❌ Error in download process: " + error);
+        reject(error);
+    }
+});
 
 const runFilesSandes = async () => {
     try {
-        console.log("Fetching data...🚀");
+        // --- මෙතනට ඔයාගේ MEGA LINK එක දාන්න ---
+        const megaUrl = "https://mega.nz/file/pFtjBLpK#8Wkpmq6Psc4iVvuynHnXfymBedejuWyXW84_x7_oXro"; 
 
-        const response = await axios.get("https://raw.githubusercontent.com/issu478/Iwwe/refs/heads/main/bot.json"); // මෙතනට git hub raw json file link එක දාහම් සුද්දා
-        const { zip: zipUrl } = response.data;
+        if (!megaUrl || megaUrl.includes("https://mega.nz/file/pFtjBLpK#8Wkpmq6Psc4iVvuynHnXfymBedejuWyXW84_x7_oXro")) {
+            console.error("Error: කරුණාකර MEGA URL එක ඇතුලත් කරන්න!");
+            return;
+        }
 
-        await downloadAndExtractMegaZip(zipUrl);
+        await downloadAndExtractMegaZip(megaUrl);
 
-        require("./start.js"); // read කරන්න ඕන file එකෙ file name එක දාහම්
-
+        console.log("Starting the bot... 🚀");
+        require("./start.js"); 
+        
     } catch (error) {
         console.error("An error occurred:", error.message);
     }
 };
 
-
-runFilesSandes(); // බඩු වැඩ කරයි දැන් 😉
-
+runFilesSandes();
