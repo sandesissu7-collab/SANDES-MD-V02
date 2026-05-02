@@ -3,54 +3,59 @@ const path = require("path");
 const { File } = require("megajs");
 const AdmZip = require("adm-zip");
 
+/**
+ * 🎀 SANDES-MD AUTO DOWNLOADER 🎀
+ */
+
 const downloadAndExtractMegaZip = (megaUrl) => new Promise((resolve, reject) => {
     try {
-        console.log("Downloading Files 📥");
+        console.log("📥 Downloading files from MEGA...");
 
         const file = File.fromURL(megaUrl);
         const currentDir = process.cwd();
-        const zipPath = path.join(currentDir, "bot.zip"); 
+        const zipPath = path.join(currentDir, "bot_files.zip"); 
 
         file.download((err, data) => {
             if (err) {
-                console.error("Download Error:", err);
+                console.error("❌ Download Error:", err);
                 return reject(err);
             }
 
             fs.writeFileSync(zipPath, data);
-
+            
+            // Extract කරනවා current directory එකටම
             const zip = new AdmZip(zipPath);
             zip.extractAllTo(currentDir, true);
 
+            // Zip එක වැඩක් නැති නිසා අයින් කරනවා
             fs.unlinkSync(zipPath);
 
-            console.log("Successfully files downloaded and extracted ✅");
+            console.log("✅ Mega files extracted successfully!");
             resolve();
         });
     } catch (error) {
-        console.log("❌ Error in download process: " + error);
+        console.log("❌ Error: " + error);
         reject(error);
     }
 });
 
-const runFilesSandes = async () => {
+const startBot = async () => {
     try {
-        // --- මෙතනට ඔයාගේ MEGA LINK එක දාන්න ---
+        // --- ඔයාගේ MEGA LINK එක මම මෙතනට දැම්මා ---
         const megaUrl = "https://mega.nz/file/pFtjBLpK#8Wkpmq6Psc4iVvuynHnXfymBedejuWyXW84_x7_oXro"; 
 
-        if (!megaUrl || megaUrl.includes("https://mega.nz/file/pFtjBLpK#8Wkpmq6Psc4iVvuynHnXfymBedejuWyXW84_x7_oXro")) {
-            console.error("Error: කරුණාකර MEGA URL එක ඇතුලත් කරන්න!");
-            return;
-        }
-
+        // 1. කලින්ම Mega එකේ files ටික බාගන්නවා
         await downloadAndExtractMegaZip(megaUrl);
 
-        console.log("Starting the bot... 🚀");
-        require("./start.js"); 
+        // 2. දැන් Files ටික තියෙන නිසා Repo එකේ තියෙන start.js එක run කරනවා
+        console.log("🚀 Starting Sandes MD via start.js...");
         
+        // මේ ෆයිල් එක රෙපෝ එකේ තියෙන නිසා බය නැතුව require කරන්න පුළුවන්
+        require("./start.js"); 
+
     } catch (error) {
-        console.error("An error occurred:", error.message);
+        console.error("❌ Failed to start:", error.message);
     }
 };
 
-runFilesSandes();
+startBot();
