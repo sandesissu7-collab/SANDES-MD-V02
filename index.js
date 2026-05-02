@@ -4,57 +4,60 @@ const { File } = require("megajs");
 const AdmZip = require("adm-zip");
 
 /**
- * 🎀 SANDES-MD AUTO DOWNLOADER 🎀
+ * 🎀 SANDES-MD AUTO DOWNLOADER - FIXED URL VERSION 🎀
  */
 
-const downloadAndExtractMegaZip = (megaUrl) => new Promise((resolve, reject) => {
-    try {
-        console.log("📥 Downloading files from MEGA...");
+const downloadAndExtractMegaZip = async (megaUrl) => {
+    return new Promise((resolve, reject) => {
+        try {
+            console.log("📥 Connecting to MEGA...");
 
-        const file = File.fromURL(megaUrl);
-        const currentDir = process.cwd();
-        const zipPath = path.join(currentDir, "bot_files.zip"); 
+            // මෙතනදී URL එක කෙලින්ම File Object එකකට හරවනවා
+            const file = File.fromURL(megaUrl);
+            const currentDir = process.cwd();
+            const zipPath = path.join(currentDir, "bot_files.zip");
 
-        file.download((err, data) => {
-            if (err) {
-                console.error("❌ Download Error:", err);
-                return reject(err);
-            }
+            file.download((err, data) => {
+                if (err) {
+                    return reject(new Error("MEGA Download Failed: " + err.message));
+                }
 
-            fs.writeFileSync(zipPath, data);
-            
-            // Extract කරනවා current directory එකටම
-            const zip = new AdmZip(zipPath);
-            zip.extractAllTo(currentDir, true);
+                console.log("📦 Saving downloaded data...");
+                fs.writeFileSync(zipPath, data);
 
-            // Zip එක වැඩක් නැති නිසා අයින් කරනවා
-            fs.unlinkSync(zipPath);
+                console.log("📂 Extracting files...");
+                const zip = new AdmZip(zipPath);
+                zip.extractAllTo(currentDir, true);
 
-            console.log("✅ Mega files extracted successfully!");
-            resolve();
-        });
-    } catch (error) {
-        console.log("❌ Error: " + error);
-        reject(error);
-    }
-});
+                fs.unlinkSync(zipPath);
+                console.log("✅ Mega files setup complete!");
+                resolve();
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
 
 const startBot = async () => {
     try {
-        // --- ඔයාගේ MEGA LINK එක මම මෙතනට දැම්මා ---
-        const megaUrl = "https://mega.nz/file/pFtjBLpK#8Wkpmq6Psc4iVvuynHnXfymBedejuWyXW84_x7_oXro"; 
+        console.log("--- 🍒 SANDES-MD V2 LOADER ---");
 
-        // 1. කලින්ම Mega එකේ files ටික බාගන්නවා
+        // URL එක හරියටම තියෙනවා නේද කියලා පරීක්ෂා කරගන්න. 
+        // URL එක අන්තිමට තියෙන '#' කෑල්ල නැති වුණොත් තමයි "No Hash" error එක එන්නේ.
+        const megaUrl = "https://mega.nz/file/pFtjBLpK#8Wkpmq6Psc4iVvuynHnXfymBedejuWyXW84_x7_oXro";
+
         await downloadAndExtractMegaZip(megaUrl);
 
-        // 2. දැන් Files ටික තියෙන නිසා Repo එකේ තියෙන start.js එක run කරනවා
-        console.log("🚀 Starting Sandes MD via start.js...");
+        console.log("🚀 Starting the main bot process...");
         
-        // මේ ෆයිල් එක රෙපෝ එකේ තියෙන නිසා බය නැතුව require කරන්න පුළුවන්
-        require("./start.js"); 
+        // Repo එකේ තියෙන start.js එක call කරනවා
+        require("./start.js");
 
     } catch (error) {
-        console.error("❌ Failed to start:", error.message);
+        console.error("❌ CRITICAL ERROR:", error.message);
+        // PM2 එක දිගටම restart වෙන එක නවත්තන්න අවුලක් වුණොත් process එක exit කරනවා
+        process.exit(1);
     }
 };
 
